@@ -1,0 +1,47 @@
+% Parámetros iniciales
+m = 1200;           % Masa del vehículo (kg)
+v0 = 30;            % Velocidad inicial (m/s)
+mu = 0.7;           % Coeficiente de fricción
+g = 9.8;            % Aceleración de la gravedad (m/s^2)
+cd = 0.3;           % Coeficiente de resistencia del aire
+h = 0.1;            % Paso de tiempo (s)
+t_max = 10;         % Tiempo máximo de simulación (s)
+
+% Inicialización de variables
+t = 0:h:t_max;      % Vector de tiempo
+v = zeros(size(t)); % Vector para almacenar velocidades
+v(1) = v0;          % Condición inicial: velocidad inicial
+
+% Imprimir encabezado de la tabla
+disp('Iteración   t (s)   v (m/s)');
+
+% Método de Euler
+for i = 1:(length(t)-1)
+    % Cálculo de la pendiente (dv/dt)
+    dv_dt = -mu*g - (cd/m)*v(i)^2;
+    % Actualización de la velocidad
+    v(i+1) = v(i) + h * dv_dt;
+
+    % Imprimir valores de t y v
+    fprintf('%8d   %5.2f   %7.3f\n', i, t(i), v(i));
+
+    % Verificar si nos aproximamos al tiempo de 4.3 segundos
+    if t(i+1) >= 4.3
+        % Interpolación lineal para encontrar la velocidad en t = 4.3
+        v_4_3 = v(i) + (4.3 - t(i)) * (v(i+1) - v(i)) / (t(i+1) - t(i));
+        fprintf('%8d   %5.2f   %7.3f\n', i+1, 4.3, v_4_3);
+
+        % Verificar si la velocidad se vuelve 0 en t = 4.3
+        if v_4_3 <= 0
+            disp(['El vehículo se detuvo exactamente en t = 4.3 segundos.']);
+        else
+            disp(['El vehículo no se detiene exactamente en t = 4.3 segundos.']);
+        end
+        break;
+    end
+end
+
+% Si no se detuvo, mostrar mensaje
+if v(end) > 0
+    disp('El vehículo no se detuvo dentro del tiempo simulado.');
+end
