@@ -1,0 +1,48 @@
+% Método de Heun para determinar el tiempo en que el vehículo se detiene
+
+% Parámetros iniciales
+m = 1200;           % Masa del vehículo (kg)
+v0 = 30;            % Velocidad inicial (m/s)
+mu = 0.7;           % Coeficiente de fricción
+g = 9.8;            % Aceleración de la gravedad (m/s^2)
+cd = 0.3;           % Coeficiente de resistencia del aire
+h = 0.1;            % Paso de tiempo (s)
+t_max = 10;         % Tiempo máximo de simulación (s)
+
+% Inicialización de variables
+t = 0:h:t_max;      % Vector de tiempo
+v = zeros(size(t)); % Vector para almacenar velocidades
+v(1) = v0;          % Condición inicial: velocidad inicial
+
+% Mostrar encabezado
+disp('Iteración   t (s)   v (m/s)');
+
+% Método de Heun
+for i = 1:(length(t)-1)
+    % Calcular pendiente inicial (predicción con Euler)
+    dv_dt_1 = -mu*g - (cd/m)*v(i)^2;
+    v_euler = v(i) + h * dv_dt_1; % Velocidad predicha con Euler
+
+    % Calcular pendiente corregida
+    dv_dt_2 = -mu*g - (cd/m)*v_euler^2;
+    v(i+1) = v(i) + (h / 2) * (dv_dt_1 + dv_dt_2); % Promedio de pendientes
+
+    % Imprimir iteración
+    fprintf('%8d   %5.2f   %7.3f\n', i, t(i), v(i));
+
+    % Detener el cálculo en t = 4.3
+    if t(i+1) >= 4.3
+        % Interpolación lineal para calcular velocidad en t = 4.3
+        v_4_3 = v(i) + (4.3 - t(i)) * (v(i+1) - v(i)) / (t(i+1) - t(i));
+        fprintf('%8d   %5.2f   %7.3f\n', i+1, 4.3, v_4_3);
+        disp('Se alcanzó t = 4.3 segundos.');
+        break;
+    end
+
+    % Detener el cálculo si la velocidad es <= 0
+    if v(i+1) <= 0
+        fprintf('%8d   %5.2f   %7.3f\n', i+1, t(i+1), 0);
+        disp('El vehículo se detuvo antes de t = 4.3 segundos.');
+        break;
+    end
+end
